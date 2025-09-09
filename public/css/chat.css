@@ -1,0 +1,364 @@
+.chat-main-container {
+    display: flex;
+    height: 100vh;
+}
+
+body {
+    font-family: "Noto Sans JP", sans-serif;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: #202123;
+    color: white;
+    flex-shrink: 0;
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar a {
+    color: #ececf1;
+    text-decoration: none;
+    display: block;
+    padding: 12px 15px;
+    border-radius: 5px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: #343541;
+}
+
+.chat-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #a4c5d2;
+    overflow: hidden;
+}
+
+.chat-header {
+    background-color: #3d424b;
+    color: white;
+    padding: 10px 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.chat-history {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.chat-bubble {
+    max-width: 100%;
+    padding: 12px 18px;
+    border-radius: 20px;
+    word-wrap: break-word;
+    line-height: 1.6;
+}
+
+.user-message .chat-bubble {
+    background-color: #8de041;
+}
+
+.assistant-message .chat-bubble {
+    background-color: #ffffff;
+}
+
+.chat-form-container {
+    padding: 20px;
+    background-color: #f0f2f5;
+    flex-shrink: 0;
+}
+
+.chat-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.hamburger-btn {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: white;
+    margin-right: 15px;
+}
+
+.chat-main-container.sidebar-hidden .sidebar {
+    margin-left: -260px;
+}
+
+@media (max-width: 768px) {
+    .chat-main-container:not(.sidebar-initial) .sidebar {
+        position: fixed;
+        height: 100%;
+        z-index: 1000;
+    }
+}
+
+.user-menu {
+    border-top: 1px solid #444;
+    padding-top: 0.5rem;
+}
+
+.user-menu .dropdown-toggle::after {
+    display: none;
+}
+
+.user-menu .dropdown-menu {
+    background-color: #343541;
+    border: 1px solid #444;
+}
+
+.user-menu .dropdown-item {
+    color: #ececf1;
+}
+
+.user-menu .dropdown-item:hover {
+    background-color: #4a4a4a;
+}
+
+.chat-bubble pre {
+    background-color: #2d2d2d;
+    color: #f8f8f2;
+    padding: 1rem;
+    border-radius: 8px;
+    position: relative;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: auto;
+}
+
+.chat-bubble pre code.hljs {
+    padding: 0;
+    background: none;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.chat-bubble pre:hover .copy-btn {
+    opacity: 1;
+}
+
+.chat-bubble table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.chat-bubble th,
+.chat-bubble td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.chat-bubble th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.chat-bubble tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.thinking {
+    display: inline-flex;
+    align-items: baseline;
+}
+
+.thinking span {
+    animation: blink 1.4s infinite both;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.thinking span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0;
+    }
+
+    40% {
+        opacity: 1;
+    }
+}
+
+.image-preview-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+}
+
+.image-preview-item {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.image-preview-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.sent-files img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.file-attachment {
+    display: flex;
+    align-items: center;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 5px;
+    text-decoration: none;
+    color: #212529;
+}
+
+.file-attachment:hover {
+    background-color: #ced4da;
+}
+
+.file-attachment i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.file-icon-preview {
+    padding: 10px;
+    background: #eee;
+    border-radius: 5px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 80px;
+    height: 80px;
+    justify-content: center;
+    text-align: center;
+}
+
+#question {
+    resize: none;
+    overflow-y: hidden;
+}
+
+.image-modal {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-modal-content {
+    margin: auto;
+    display: block;
+    max-width: 80%;
+    max-height: 80vh;
+}
+
+.image-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.message-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 85%;
+}
+
+.user-message .message-container {
+    flex-direction: row-reverse;
+}
+
+.chat-timestamp {
+    font-size: 0.75rem;
+    color: #495057;
+    flex-shrink: 0;
+    padding-bottom: 5px;
+    white-space: nowrap;
+}
+
+.date-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.date-divider::before,
+.date-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+}
+
+.date-divider span {
+    padding: 0 15px;
+    font-size: 0.8rem;
+    color: #6c757d;
+    background-color: #a4c5d2;
+}
+
