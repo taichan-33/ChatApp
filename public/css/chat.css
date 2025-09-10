@@ -362,3 +362,54 @@ body {
     background-color: #a4c5d2;
 }
 
+
+/* public/css/chat.css の末尾に追加 (以前のレイアウトCSSは削除) */
+
+/* === アイコンとメッセージのレイアウト設定 (最終修正版) === */
+
+/* public/css/chat.css の末尾のレイアウト部分をこれで置き換えてください */
+
+/* === アイコンとメッセージのレイアウト設定 (最終修正版) === */
+
+.chat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 8px;
+    flex-shrink: 0;
+    /* 名前の高さ(約22px)ぶん、アイコンを少し下にずらして吹き出しと高さを合わせる */
+    margin-top: 22px; 
+}
+
+/* 名前と吹き出しをまとめるコンテナ */
+.message-content-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%; /* メッセージが横に広がりすぎないように制限 */
+}
+
+/* 送信者名のスタイル */
+.chat-sender-name {
+    font-size: 0.8rem;
+    color: #495057;
+    margin-bottom: 4px;
+    padding: 0 5px;
+}
+
+/* 吹き出しとタイムスタンプのコンテナ */
+.message-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+/* ユーザーの吹き出しとタイムスタンプの順序を反転させる */
+.user-message .message-container {
+    flex-direction: row-reverse;
+}
+
+/* ユーザーの名前を右揃えにする */
+.user-message .chat-sender-name {
+    text-align: right;
+}

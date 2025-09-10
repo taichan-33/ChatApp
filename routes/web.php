@@ -4,7 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AdminController;
-use App\Http\Middleware\IsAdmin; // <-- この行を追加
+use App\Http\Middleware\IsAdmin; // IsAdminミドルウェアをインポート
+use App\Http\Controllers\Auth\AdminLoginController; // AdminLoginControllerをインポート
 
 /*
 |--------------------------------------------------------------------------
@@ -17,39 +18,55 @@ use App\Http\Middleware\IsAdmin; // <-- この行を追加
 |
 */
 
-// Breezeが作成したゲスト向けのルート（ログイン画面など）
+// --- 一般ユーザー向けルート ---
+
+// トップページ
 Route::get('/', function () {
+    // ログインしている場合はチャット画面へ、していない場合はウェルカムページへ
+    if (auth()->check()) {
+        return redirect()->route('chat.index');
+    }
     return view('welcome');
 });
 
-// Breezeが作成したダッシュボードのルート
-Route::get('/dashboard', function () {
-    // ★ログイン後のトップページをチャット画面に変更します
-    return redirect()->route('chat.index');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-
-// チャット関連のルート
+// 認証済みユーザーのみがアクセスできるルート
 Route::middleware('auth')->group(function () {
-    // ログイン後の「/」アクセスもチャット画面が表示されるように変更
-    Route::get('/', [ChatController::class, 'index'])->name('chat.index');
+    // ダッシュボード（実質チャット画面へのリダイレクト）
+    Route::get('/dashboard', function () {
+        return redirect()->route('chat.index');
+    })->name('dashboard');
+
+    // チャット関連
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/new', [ChatController::class, 'startNewConversation'])->name('chat.new');
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}', [ChatController::class, 'chat'])->name('chat.post');
-});
-
-// プロフィール関連のルート
-Route::middleware('auth')->group(function () {
+    
+    // プロフィール関連
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// ▼▼▼ ミドルウェアの指定をクラス名に修正します ▼▼▼
-Route::middleware(['auth', IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'index'])->name('index');
-    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+
+// --- 管理者向けルート ---
+
+// 'admin' というURLプレフィックスと 'admin.' というルート名プレフィックスを適用
+Route::prefix('admin')->name('admin.')->group(function () {
+    // ログイン画面（認証不要）
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
+    // ログイン処理（認証不要）
+    Route::post('/login', [AdminLoginController::class, 'login']);
+    // ログアウト処理
+    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
+    
+    // IsAdminミドルウェアを適用し、管理者認証が必要なルートを定義
+    Route::middleware(IsAdmin::class)->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    });
 });
 
 
+// Breezeの認証ルートを読み込む
 require __DIR__.'/auth.php';

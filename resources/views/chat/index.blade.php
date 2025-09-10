@@ -4,7 +4,6 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-        {{-- ▼▼▼ 分離したCSSファイルを読み込みます ▼▼▼ --}}
         <link rel="stylesheet" href="{{ asset('css/chat.css') }}">
     </x-slot>
 
@@ -30,9 +29,6 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark w-100" aria-labelledby="userMenuButton">
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-gear me-2"></i>プロフィール</a></li>
-                        @if(Auth::user()->is_admin)
-                            <li><a class="dropdown-item" href="{{ route('admin.index') }}"><i class="bi bi-shield-lock me-2"></i>管理画面</a></li>
-                        @endif
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
@@ -51,45 +47,74 @@
         <div class="chat-area">
             <div class="chat-header">
                 <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle sidebar"><i class="bi bi-list"></i></button>
-                <span id="header-title">{{ optional($currentConversation)->title ?? 'AI Chat' }}</span>
+                {{-- ▼▼▼ Bot名を表示するように修正 ▼▼▼ --}}
+                <span id="header-title">{{ $settings->bot_name ?? 'AI Chat' }}</span>
             </div>
             <div class="chat-history" id="chat-history">
                 @if($currentConversation)
                     @php $lastDate = null; @endphp
                     @foreach($currentConversation->messages()->with('files')->get() as $msg)
-                        {{-- 日付が変わったら区切り線を表示するロジック --}}
+                        {{-- 日付区切り --}}
                         @php $currentDate = $msg->created_at->format('Y-m-d'); @endphp
                         @if ($currentDate !== $lastDate)
                             <div class="date-divider"><span>{{ $msg->created_at->isToday() ? '今日' : $msg->created_at->format('Y年n月j日') }}</span></div>
                             @php $lastDate = $currentDate; @endphp
                         @endif
                         
+                        {{-- ▼▼▼ メッセージ表示エリア全体を修正 ▼▼▼ --}}
                         <div class="d-flex mb-3 {{ $msg->role === 'user' ? 'justify-content-end user-message' : 'justify-content-start assistant-message' }}">
-                            <div class="message-container">
-                                <div class="chat-bubble">
-                                    <div class="sent-files">
-                                        @foreach($msg->files as $file)
-                                            @if(str_starts_with($file->mime_type, 'image/'))
-                                                <div class="sent-files d-flex flex-wrap">
-                                                    <img src="{{ Storage::url($file->file_path) }}" class="img-fluid rounded" alt="{{ $file->original_name }}">
-                                                </div>
-                                            @else
-                                                <a href="{{ Storage::url($file->file_path) }}" target="_blank" class="file-attachment">
-                                                    <i class="bi {{ \App\Http\Controllers\ChatController::getFileIconClass($file->mime_type) }}"></i>
-                                                    <span>{{ $file->original_name }}</span>
-                                                </a>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                    @if($msg->content)
-                                        <div class="mt-2">{!! Str::markdown($msg->content, ['html_input' => 'strip']) !!}</div>
+                            
+                            {{-- アイコン表示 --}}
+                            @if ($msg->role !== 'user')
+                                @php
+                                    $assistantIcon = !empty($settings->bot_icon_path) 
+                                        ? Storage::url($settings->bot_icon_path) 
+                                        : asset('images/assistant-icon.png');
+                                @endphp
+                                <img src="{{ $assistantIcon }}" alt="assistant icon" class="chat-icon">
+                            @else
+                                <img src="{{ Auth::user()->icon ? Storage::url(Auth::user()->icon) : asset('images/default-icon.png') }}" alt="user icon" class="chat-icon">
+                            @endif
+                            
+                            {{-- 名前と吹き出しをまとめるコンテナ --}}
+                            <div class="message-content-container">
+                                {{-- 送信者名 --}}
+                                <div class="chat-sender-name">
+                                    @if ($msg->role === 'user')
+                                        {{ Auth::user()->name }}
+                                    @else
+                                        {{ $settings->bot_name ?? 'AI Assistant' }}
                                     @endif
                                 </div>
-                                <div class="chat-timestamp">
-                                    {{ $msg->created_at->format('H:i') }}
+
+                                {{-- 既存の吹き出しとタイムスタンプ --}}
+                                <div class="message-container">
+                                    <div class="chat-bubble">
+                                        <div class="sent-files">
+                                            @foreach($msg->files as $file)
+                                                @if(str_starts_with($file->mime_type, 'image/'))
+                                                    <div class="sent-files d-flex flex-wrap">
+                                                        <img src="{{ Storage::url($file->file_path) }}" class="img-fluid rounded" alt="{{ $file->original_name }}">
+                                                    </div>
+                                                @else
+                                                    <a href="{{ Storage::url($file->file_path) }}" target="_blank" class="file-attachment">
+                                                        <i class="bi {{ \App\Http\Controllers\ChatController::getFileIconClass($file->mime_type) }}"></i>
+                                                        <span>{{ $file->original_name }}</span>
+                                                    </a>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                        @if($msg->content)
+                                            <div class="message-content">{!! Str::markdown($msg->content, ['html_input' => 'strip']) !!}</div>
+                                        @endif
+                                    </div>
+                                    <div class="chat-timestamp">
+                                        {{ $msg->created_at->format('H:i') }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        {{-- ▲▲▲ メッセージ表示エリアの修正ここまで ▲▲▲ --}}
                     @endforeach
                 @else
                     <p class="text-center text-muted mt-5">サイドバーの「新しいチャット」から会話を開始してください。</p>
@@ -123,7 +148,6 @@
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         
-        {{-- PHPからJSへ渡す必要のある動的なデータを定義 --}}
         @if($currentConversation)
         <script>
             window.chatConfig = {
@@ -133,8 +157,6 @@
         </script>
         @endif
 
-        {{-- 分離したJSファイルを読み込み --}}
         <script src="{{ asset('js/chat.js') }}"></script>
     </x-slot>
 </x-app-layout>
-

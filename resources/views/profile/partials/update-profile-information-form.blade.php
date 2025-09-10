@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -46,6 +46,17 @@
                 </div>
             @endif
         </div>
+
+        {{-- アイコン設定の追加 --}}
+        <div>
+            <x-input-label for="icon" :value="__('アイコン')" />
+            @if($user->icon)
+                <img src="{{ Storage::url($user->icon) }}" alt="current icon" class="w-20 h-20 rounded-full object-cover mb-2">
+            @endif
+            <input id="icon" name="icon" type="file" class="mt-1 block w-full" />
+            <x-input-error class="mt-2" :messages="$errors->get('icon')" />
+        </div>
+
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>

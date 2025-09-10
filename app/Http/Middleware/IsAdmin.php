@@ -5,8 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth; // ▼▼▼ この行を追加しました！ ▼▼▼
-
 
 class IsAdmin
 {
@@ -15,12 +13,14 @@ class IsAdmin
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-
     public function handle(Request $request, Closure $next): Response
-{
-    if (!Auth::check() || !Auth::user()->is_admin) {
-        abort(403, '管理者専用ページです。');
+    {
+        // 管理者としてログインしたことを示すセッションキーがあるか確認する
+        if ($request->session()->get('is_admin_logged_in')) {
+            return $next($request);
+        }
+
+        // 管理者としてログインしていなければ、管理者ログインページにリダイレクト
+        return redirect()->route('admin.login');
     }
-    return $next($request);
-}
 }
